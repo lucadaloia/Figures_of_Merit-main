@@ -1,0 +1,21 @@
+# Ignore virtual environments
+venv/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+
+# Ignore SQLite backups/logs (but keep main DB)
+*.log
+
+# Ignore compiled migrations and system files
+*.pyc
+.DS_Store
+
+# Ignore all media uploads except reference files
+media/references/*.pdf
+media/references/*.docx
+media/references/*.zip
+media/references/*.xlsm
+
+# Optional: exclude other reference formats if sensitive
