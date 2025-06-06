@@ -23,7 +23,7 @@ def home(request):
                     {device.semiconductor_material} {device.device_type}<br>
                     {device.first_author} ({device.year})<br>
                     <b>{device.title}</b><br>
-                    <a href="{device.reference_file.url if device.reference_file else '#'}" target="_blank">Click to access paper</a>
+                    <a href="{device.reference_file.url if device.reference_file else '#'}" target="_blank">PDF</a>
                 """,
                 customdata=[[device.reference_file.url if device.reference_file else '#']],
                 name=device.device_type
