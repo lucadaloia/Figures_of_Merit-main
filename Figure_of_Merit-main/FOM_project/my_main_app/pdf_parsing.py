@@ -36,7 +36,6 @@ for file_path in file_paths:
     doi_encoded = quote(str(doi), safe='')
     dois.append(doi_encoded)
 
-print(dois)
 
 
 global title, author, journal, year
