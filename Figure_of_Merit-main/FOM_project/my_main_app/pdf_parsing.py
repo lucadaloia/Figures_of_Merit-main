@@ -2,6 +2,7 @@ import re #library to search and match text
 import PyPDF2 #library to read and extract data/text from PDF document
 import requests
 from urllib.parse import quote
+import pdf_select
 
 global doi, dois
 dois = []
@@ -26,9 +27,8 @@ def pdf_doi_extraction(file_path):
 
 # File path variable - change to GUI to allow user to select multiple from file explorer
 
-file_paths = [r'C:\Users\Luca\Downloads\Figure_of_Merit-main\Figure_of_Merit-main\FOM_project\my_main_app\Evolution_Challenges_and_Applications_of_Modern_MO.pdf', 
-              r'C:\Users\Luca\Downloads\Figure_of_Merit-main\Figure_of_Merit-main\FOM_project\my_main_app\Applications_and_challenges_of_Silicon_Carbide_SiC.pdf',
-              r'C:\Users\Luca\Downloads\Figure_of_Merit-main\Figure_of_Merit-main\FOM_project\my_main_app\10.1109-16.536820.pdf']
+file_paths = list(pdf_select.select_pdfs())
+print(file_paths)
 
 for file_path in file_paths:
     doi = pdf_doi_extraction(file_path)
@@ -86,8 +86,8 @@ def file_data_extraction(dois):
                 '\nYear:', year,
                 '\n------------------------------\n')
 
-    else:
-        print("DOI not found or error occurred.")
+        else:
+            print("DOI not found or error occurred.")
 
 
 file_data_extraction(dois)
