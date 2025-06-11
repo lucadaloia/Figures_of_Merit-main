@@ -59,8 +59,8 @@ year = None
 
 
 
-def file_data_extraction(dois):
-    for doi in dois:
+def file_data_extraction(dois, paths):
+    for doi, path in zip(dois, paths):
         url = f"https://api.crossref.org/works/{doi}"
         response = requests.get(url)
         if response.status_code == 200:
@@ -92,14 +92,13 @@ def file_data_extraction(dois):
             year = metadata.get('issued', {}).get('date-parts', [[None]])[0][0]
 
             metadata = [doi, title, author, journal, year]
-            insert_data.insert_metadata(metadata)
+            insert_data.insert_metadata(metadata, path)
             print("File: '",title,"' has been added succesfully")
             
         else:
             print("An error occurred.")
 
-
-file_data_extraction(dois)
+file_data_extraction(dois, file_paths)
 
 
 
