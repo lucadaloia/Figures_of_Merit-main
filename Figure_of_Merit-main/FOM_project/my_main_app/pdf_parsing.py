@@ -4,6 +4,19 @@ import requests
 from urllib.parse import quote
 import pdf_select
 
+import django
+import os
+import sys
+
+# Add the directory containing FOM_project to sys.path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# Add the parent directory to sys.path
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'FOM_project.settings')  # Use your project name
+django.setup()
+
+import insert_data
+
 global doi, dois
 dois = []
 
@@ -28,13 +41,13 @@ def pdf_doi_extraction(file_path):
 # File path variable - change to GUI to allow user to select multiple from file explorer
 
 file_paths = list(pdf_select.select_pdfs())
-print(file_paths)
 
 for file_path in file_paths:
     doi = pdf_doi_extraction(file_path)
     #print('DOI:',doi)
     doi_encoded = quote(str(doi), safe='')
     dois.append(doi_encoded)
+    
 
 
 
@@ -78,15 +91,12 @@ def file_data_extraction(dois):
             # Get year
             year = metadata.get('issued', {}).get('date-parts', [[None]])[0][0]
 
-            print('DOI:', doi,
-                '\nTitle:', title,
-                '\nAuthor:', author,
-                '\nJournal:', journal,
-                '\nYear:', year,
-                '\n------------------------------\n')
-
+            metadata = [doi, title, author, journal, year]
+            insert_data.insert_metadata(metadata)
+            print("File: '",title,"' has been added succesfully")
+            
         else:
-            print("DOI not found or error occurred.")
+            print("An error occurred.")
 
 
 file_data_extraction(dois)
