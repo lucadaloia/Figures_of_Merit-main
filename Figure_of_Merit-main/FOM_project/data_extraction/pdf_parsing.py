@@ -3,6 +3,7 @@ import PyPDF2 #library to read and extract data/text from PDF document
 import requests
 from urllib.parse import quote
 import pdf_select
+import plot_extract
 
 import django
 import os
@@ -29,9 +30,9 @@ def pdf_doi_extraction(file_path):
             text += page.extract_text() or ""  #append data/text if any
 
     # Search for DOI
-    doi_found = re.search(r'(doi:|DOI:)\s*([^\s]+)', text)
+    doi_found = re.search(r'(10\.\d{4,9}/[-._;()/:A-Z0-9]+)', text, re.I)
     if doi_found:
-        doi = doi_found.group(2)
+        doi = doi_found.group(1)
     else:
         print('DOI not found')
     return doi
@@ -68,6 +69,7 @@ def file_data_extraction(dois, paths):
             metadata = data['message']
             # get title
             title = metadata.get('title', [None])[0]
+            plot_extract.extract(path)
 
             # get authors and add them to a string (list separated by comma)
             authors = metadata.get('author', []) 

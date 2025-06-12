@@ -27,3 +27,10 @@ class DeviceData(models.Model):
 
     def __str__(self):
         return f"{self.semiconductor_material} {self.device_type} ({self.year})"
+
+
+class MaterialData(models.Model):
+    device = models.CharField(max_length=255, blank=True, default='')
+    material = models.CharField(max_length=255, blank=True, default='')
+    br_voltage = models.JSONField(default=list, blank=True)
+    r_on = models.JSONField(default=list, blank=True)
