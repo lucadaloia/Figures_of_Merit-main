@@ -29,8 +29,7 @@ class DeviceData(models.Model):
         return f"{self.semiconductor_material} {self.device_type} ({self.year})"
 
 
-class MaterialData(models.Model):
-    device = models.CharField(max_length=255, blank=True, default='')
+class MaterialLimit(models.Model):
     material = models.CharField(max_length=255, blank=True, default='')
     br_voltage = models.JSONField(default=list, blank=True)
     r_on = models.JSONField(default=list, blank=True)
