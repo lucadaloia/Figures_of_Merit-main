@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import DeviceData
+from .models import DeviceData, MaterialLimit
 import plotly.graph_objs as go
 from plotly.offline import plot
 
@@ -44,4 +44,36 @@ def home(request):
     })
 
 
+def material_limits(request):
+    limits = MaterialLimit.objects.all()
+
+    traces = []
+
+    # Only include devices with positive, non-zero values (required for log scale)
+    for limit in limits:
+        x_data = limit.br_voltage
+        y_data = limit.r_on
+        
+       # for x, y in x_data, y_data
+
+       # Plot a line for each MaterialLimit
+        traces.append(go.Scatter(
+            x=x_data,
+            y=y_data,
+            mode='lines',
+            name=str(limit.material) if hasattr(limit, 'material') else 'Material Limit'
+        ))
+
+    layout = go.Layout(
+        xaxis=dict(title="Breakdown Voltage (V)", type='log'),
+        yaxis=dict(title="R<sub>on</sub> (mΩ·cm²)", type='log'),
+        hovermode='closest'
+    )
+
+    fig = go.Figure(data=traces, layout=layout)
+    plot_div = plot(fig, output_type='div', include_plotlyjs=False)
+
+    return render(request, 'my_main_app/FOM_plot.html', {
+        'plot_div': plot_div,
+    })
 

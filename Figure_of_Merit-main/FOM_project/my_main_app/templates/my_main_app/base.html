@@ -26,7 +26,10 @@
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
   <div class="container-fluid">
-    <a class="navbar-brand" href="{% url 'home' %}">Home</a>
+    <div class="navbar-nav">
+      <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="{% url 'home' %}">Home</a>
+      <a class="nav-link {% if request.path == '/FOM_plot/' %}active{% endif %}" href="{% url 'FOM_plot' %}">FOM Plot</a>
+    </div>
   </div>
 </nav>
 
@@ -70,7 +73,22 @@
     #admin-button:hover {
       background-color: #155ab6;
     }
+
+    .navbar-nav .nav-link{
+      font-size: 1.2rem;           /* Change link font size */
+      font-family: 'Segoe UI', sans-serif; /* Change link font family */
+      color: #ffffff;;        
+    }
     
+    .navbar {
+      max-height: 35px !important;
+      padding-top: 0px !important;
+      padding-bottom: 0px !important;
+    }
+    .navbar-nav .nav-link.active {
+      color: #cbc9c9 !important; /* Or any color you want for the active link */
+      font-weight: bold;
+    }
     
   </style>
 </head>
