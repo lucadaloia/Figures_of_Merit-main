@@ -5,7 +5,7 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('', views.home, name='home'),
-    path('FOM_plot/', views.material_limits, name = 'FOM_plot')
+    path('figures-of-merit/', views.material_limits, name = 'FOM_plot')
 ] 
 
 if settings.DEBUG:
