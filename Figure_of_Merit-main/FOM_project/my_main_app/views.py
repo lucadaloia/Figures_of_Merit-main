@@ -64,6 +64,9 @@ def material_limits(request):
             name=str(limit.material) if hasattr(limit, 'material') else 'Material Limit'
         ))
 
+        if not traces:
+            traces.append(go.Scatter(x=[1], y=[1], mode='lines', name='Dummy'))
+
     layout = go.Layout(
         xaxis=dict(title="Breakdown Voltage (V)", type='log'),
         yaxis=dict(title="R<sub>on</sub> (mΩ·cm²)", type='log'),

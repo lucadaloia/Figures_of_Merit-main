@@ -1,5 +1,8 @@
-<!-- templates/my_main_app/home.html -->
 {% extends 'my_main_app/base.html' %}
 
-{% block title %}Home{% endblock %}
+{% block title %}FOM Dashboard{% endblock %}
 
+{% block content %}
+  <h1>FOM Plot</h1>
+  {{ plot_div|safe }}
+{% endblock %}

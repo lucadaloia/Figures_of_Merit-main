@@ -13,6 +13,17 @@ django.setup()
 from my_main_app.models import MaterialLimit
 
 
+def remove_outliers(data):
+    i = 1
+    removed = 0
+    while i < len(data):
+        if data[i-1] > data[i] or data[i] > 5*data[i-1]:
+            data.pop(i)
+            removed += 1
+        else:
+            i += 1
+    return data
+
 def extract_limits(json_path):
     with open(json_path, 'r', encoding = 'utf-8') as f:
         data = json.load(f)
@@ -23,6 +34,8 @@ def extract_limits(json_path):
             values = [item['value'] for item in values]
             # Unzip the list of [x, y]
             x_data, y_data = zip(*values) if values else ([], [])
+            x_data = remove_outliers(list(x_data))
+            y_data = remove_outliers(list(y_data))
             results.append({
                 'name': name,
                 'x_data': list(x_data),
@@ -33,11 +46,9 @@ def extract_limits(json_path):
 def insert_into_db(dataset):
     materials = list(MaterialLimit.objects.values_list('material', flat=True))
     for data in dataset:
-        print(materials)
         if data['name'] in materials:
             #material already in database
-            print('already there')
-            None
+            print(data['name'], 'already there')
         else:
             print('adding', data['name'])
             # add material to the database/table
@@ -49,9 +60,15 @@ def insert_into_db(dataset):
             obj.save()
     return
 
+
+
+
+
+
+
 #MaterialLimit.objects.all().delete()
 
-json_data = extract_limits('./charts/limits_brV_Ron(1).json')
+json_data = extract_limits('./charts/limits_brV_Ron(2).json')
 
 insert_into_db(json_data)
 
