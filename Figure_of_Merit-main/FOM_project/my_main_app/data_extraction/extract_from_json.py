@@ -122,28 +122,43 @@ def extract_device_data(file_paths):
                 # name = 'company - doi'
                 #DOI = name - company
                 # Company or Univ = name - doi 
-                company_univ, doi = dataset.get('name').split(' - ', 1)
+                name = dataset.get('name', '')
+                if ' - ' in name:
+                    company_univ, doi = name.split(' - ', 1)
+                else:
+                    company_univ = name
+                    doi = ''
                 
                 # get metadata and insert into table
-                pdf_parsing.file_data_extraction(doi, '')
-                # get x and y values
-                values = dataset.get('data', [])
-                values = [item['value'] for item in values]
-                # Vb = x data and Ron = y data
-                breakdown_voltage, r_on = zip(*values) if values else ([], [])
+                exists = models.DeviceData.objects.filter(doi=doi).exists()
+                if exists:
+                    print('already there', doi)
+                    None
+                else:
+                    pdf_parsing.file_data_extraction([doi], [''])
+                    # get x and y values
+                    values = dataset.get('data', [])
+                    values = [item['value'] for item in values]
+                    # Vb = x data and Ron = y data
+                    
+                    
+                    if values:
+                        breakdown_voltage, r_on = zip(*values)
+                        breakdown_voltage, r_on = values[0]
+                    else:
+                        breakdown_voltage, r_on = 0, 0
+                    device_data = [company_univ, doi, semiconductor_material, device_type, breakdown_voltage, r_on]
 
-                device_data = [company_univ, doi, semiconductor_material, device_type, breakdown_voltage, r_on]
+                    current_doi = doi
+                    #search for device - obj created in  file_data_extraction
+                    device = models.DeviceData.objects.get(doi=current_doi)
+                    device.breakdown_voltage = breakdown_voltage
+                    device.r_on = r_on
+                    device.semiconductor_material = semiconductor_material
+                    device.device_type = device_type
+                    device.company_university = company_univ
 
-                current_doi = doi
-                #search for device - obj created in  file_data_extraction.py
-                device = models.DeviceData.objects.filter(doi=current_doi)
-                device.breakdown_voltage = breakdown_voltage
-                device.r_on = r_on
-                device.semiconductor_material = semiconductor_material
-                device.device_type = device_type
-                device.company_university = company_univ
-
-                device.save()
+                    device.save()
                 
 
 
@@ -155,14 +170,13 @@ def extract_device_data(file_paths):
 
     return
 
-select_json()
-
+json_paths = select_json()
+extract_device_data(json_paths)
 
 
 #MaterialLimit.objects.all().delete()
-#obj = MaterialLimit.objects.get(material="GaN Bulk Conduction")
-#obj.delete()
-
+#models.DeviceData.objects.filter(doi="10.1109/LED.2015.2478907").delete()
+#models.DeviceData.objects.all().delete()
 #json_data = extract_limits('./charts/limits_brV_Ron(2).json')
 
 #insert_into_db(json_data)
