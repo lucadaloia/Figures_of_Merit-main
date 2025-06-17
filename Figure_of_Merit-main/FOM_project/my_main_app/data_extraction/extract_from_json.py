@@ -112,7 +112,7 @@ def extract_device_data(file_paths):
         # Device type = file name (standard chosen)
         device_type = file_name
         #fetch device material from device type
-        semiconductor_material = " ".join(device_type.split()[1:])
+        semiconductor_material = device_type.split()[0]
 
         with open(file_path, 'r', encoding = 'utf-8') as f:
             data = json.load(f)
@@ -170,13 +170,15 @@ def extract_device_data(file_paths):
 
     return
 
+
+models.DeviceData.objects.all().delete()
 json_paths = select_json()
 extract_device_data(json_paths)
 
 
 #MaterialLimit.objects.all().delete()
 #models.DeviceData.objects.filter(doi="10.1109/LED.2015.2478907").delete()
-#models.DeviceData.objects.all().delete()
+
 #json_data = extract_limits('./charts/limits_brV_Ron(2).json')
 
 #insert_into_db(json_data)
