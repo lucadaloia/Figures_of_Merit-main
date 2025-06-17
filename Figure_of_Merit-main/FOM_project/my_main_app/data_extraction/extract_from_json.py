@@ -4,16 +4,20 @@ import django
 import sys
 from django.core.management import call_command
 import math
+from tkinter import filedialog
+import tkinter as tk
+
+import pdf_parsing
 
 
 # Add the project root to sys.path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+import sys
+sys.path.append(r"C:\Users\Luca.DESKTOP-NPVSRVE\Desktop\Figure_of_Merit\Figures_of_Merit-main\Figure_of_Merit-main")
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'FOM_project.settings')
 django.setup()
 
-from my_main_app.models import MaterialLimit
-
+from my_main_app import models
 
 def remove_outliers(data):
     i = 1
@@ -64,7 +68,6 @@ def extract_limits(json_path):
             x_data, y_data = extend_plot_lines(x_data, y_data)
             x_data = remove_outliers(list(x_data))
             y_data = remove_outliers(list(y_data))
-            if name == "Diamond": print(y_data)
             results.append({
                 'name': name,
                 'x_data': list(x_data),
@@ -73,7 +76,7 @@ def extract_limits(json_path):
     return results
 
 def insert_into_db(dataset):
-    materials = list(MaterialLimit.objects.values_list('material', flat=True))
+    materials = list(models.MaterialLimit.objects.values_list('material', flat=True))
     for data in dataset:
         if data['name'] in materials:
             #material already in database
@@ -81,7 +84,7 @@ def insert_into_db(dataset):
         else:
             print('adding', data['name'])
             # add material to the database/table
-            obj = MaterialLimit.objects.create(
+            obj = models.MaterialLimit.objects.create(
                 material = data['name'],
                 br_voltage = data['x_data'],
                 r_on = data['y_data']
@@ -89,9 +92,70 @@ def insert_into_db(dataset):
             obj.save()
     return
 
+def select_json():
+    root = tk.Tk()
+    root.withdraw()  # Hide the main window
+    file_paths = filedialog.askopenfilenames(
+        title="Select JSON files",
+        filetypes=[("JSON files", "*.json")],
+    )
+    return list(file_paths)
+
+def extract_device_data(file_paths):
+    for file_path in file_paths:
+        # fetch file name from path
+        file_name = os.path.basename(file_path)
+        # remove extension
+        file_name = os.path.splitext(file_name)[0]
+        file_name = file_name.replace("_", " ")
+
+        # Device type = file name (standard chosen)
+        device_type = file_name
+        #fetch device material from device type
+        semiconductor_material = " ".join(device_type.split()[1:])
+
+        with open(file_path, 'r', encoding = 'utf-8') as f:
+            data = json.load(f)
+            devices_data = []
+            for dataset in data.get('datasetColl', []):
+
+                # name = 'company - doi'
+                #DOI = name - company
+                # Company or Univ = name - doi 
+                company_univ, doi = dataset.get('name').split(' - ', 1)
+                
+                # get metadata and insert into table
+                pdf_parsing.file_data_extraction(doi, '')
+                # get x and y values
+                values = dataset.get('data', [])
+                values = [item['value'] for item in values]
+                # Vb = x data and Ron = y data
+                breakdown_voltage, r_on = zip(*values) if values else ([], [])
+
+                device_data = [company_univ, doi, semiconductor_material, device_type, breakdown_voltage, r_on]
+
+                current_doi = doi
+                #search for device - obj created in  file_data_extraction.py
+                device = models.DeviceData.objects.filter(doi=current_doi)
+                device.breakdown_voltage = breakdown_voltage
+                device.r_on = r_on
+                device.semiconductor_material = semiconductor_material
+                device.device_type = device_type
+                device.company_university = company_univ
+
+                device.save()
+                
 
 
 
+
+
+
+
+
+    return
+
+select_json()
 
 
 

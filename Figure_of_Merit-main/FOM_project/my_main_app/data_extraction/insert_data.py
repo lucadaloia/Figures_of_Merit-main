@@ -12,8 +12,8 @@ def insert_metadata(metadata, path):
             first_author = metadata[2],
             journal = metadata[3],
             year = metadata[4],
-            breakdown_voltage = 650,
-            r_on = 20,
+            breakdown_voltage = '',
+            r_on = '',
             #reference_file = f
             )
         entry.save()
