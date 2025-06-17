@@ -26,7 +26,7 @@ def home(request):
                     <a href="{device.reference_file.url if device.reference_file else '#'}" target="_blank">PDF</a>
                 """,
                 customdata=[[device.reference_file.url if device.reference_file else '#']],
-                name=device.device_type
+                name= f'{device.company_university} - {device.device_type}'
             ))
             
 
