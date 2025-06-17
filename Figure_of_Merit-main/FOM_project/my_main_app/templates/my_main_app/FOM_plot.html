@@ -5,4 +5,19 @@
 {% block content %}
   <h1>Figures of Merit</h1>
   {{ plot_div|safe }}
+ <!-- Plotly JS to open paper once datapoint is clicked -->
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const plot = document.querySelector('.plotly-graph-div');
+    if (plot) {
+      plot.on('plotly_click', function (data) {
+        const url = data.points[0].customdata;
+        if (url && url !== "#") {
+          window.open(url, '_blank'); // Open DOI in a new tab
+        }
+      });
+    }
+  });
+</script>
+
 {% endblock %}

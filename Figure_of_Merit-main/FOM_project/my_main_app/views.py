@@ -75,40 +75,52 @@ def material_limits(request):
         y = [d.r_on for d in devs if d.breakdown_voltage > 0 and d.r_on > 0]
         symbols = [material_to_symbol.get(d.semiconductor_material, 'circle') for d in devs if d.breakdown_voltage > 0 and d.r_on > 0]
         texts = [f"{d.semiconductor_material} {d.device_type}<br>{d.first_author} ({d.year})<br><b>{d.title}</b>" for d in devs if d.breakdown_voltage > 0 and d.r_on > 0]
-
+        customdata = [f"https://doi.org/{d.doi}" if d.doi else "#" for d in devs]
+        name = [f'{d.semiconductor_material} - {d.company_university}' for d in devs]
         if x and y:
             device_traces.append(go.Scatter(
                 x=x,
                 y=y,
                 mode='markers',
-                name=company,
+                name= name[0],
                 marker=dict(
                     size=10,
                     symbol=symbols,
                     line=dict(width=1, color='black')
                 ),
-                text=texts,
+                text= texts,
+                customdata=customdata,
             ))
+            
+    ##################
+    # Plotting Material Limits
+    ##################
 
-    traces = []
+    limit_traces = []
 
-    # Only include devices with positive, non-zero values (required for log scale)
+    device_materials = set(d.semiconductor_material for d in devices)
     for limit in limits:
-        x_data = limit.br_voltage
-        y_data = limit.r_on
-       
-       # for x, y in x_data, y_data
-
-       # Plot a line for each MaterialLimit
-        traces.append(go.Scatter(
-            x=x_data,
-            y=y_data,
-            mode='lines',
-            name=str(limit.material) if hasattr(limit, 'material') else 'Material Limit'
-        ))
-
-        if not traces:
-            traces.append(go.Scatter(x=[1], y=[1], mode='lines', name='Dummy'))
+        if hasattr(limit, 'material') and limit.material in device_materials:
+            x_data = limit.br_voltage
+            y_data = limit.r_on
+            limit_traces.append(go.Scatter(
+                x=x_data,
+                y=y_data,
+                mode='lines',
+                name=str(limit.material),
+                visible=True  # This trace will be visible
+            ))
+        else:
+            
+            x_data = limit.br_voltage
+            y_data = limit.r_on
+            limit_traces.append(go.Scatter(
+                x=x_data,
+                y=y_data,
+                mode='lines',
+                name=str(limit.material),
+                visible='legendonly'  # This trace will be hidden initially
+            ))
 
 
     # Set x and y axis upper limit (ranges)
@@ -136,7 +148,7 @@ def material_limits(request):
         yaxis_range = None
 
 
-    all_traces = device_traces + traces
+    all_traces = device_traces + limit_traces
 
     layout = go.Layout(
         xaxis=dict(title="Breakdown Voltage (V)", type='log', range=xaxis_range),
