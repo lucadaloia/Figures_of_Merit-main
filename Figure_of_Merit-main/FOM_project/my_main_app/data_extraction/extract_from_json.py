@@ -113,7 +113,8 @@ def extract_device_data(file_paths):
         device_type = file_name
         #fetch device material from device type
         semiconductor_material = device_type.split()[0]
-
+        device_type = " ".join(device_type.split()[1:])
+        
         with open(file_path, 'r', encoding = 'utf-8') as f:
             data = json.load(f)
             devices_data = []
