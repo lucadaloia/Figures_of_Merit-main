@@ -6,6 +6,7 @@ from django.core.management import call_command
 import math
 from tkinter import filedialog
 import tkinter as tk
+import pandas as pd
 
 import pdf_parsing
 
@@ -92,14 +93,7 @@ def insert_into_db(dataset):
             obj.save()
     return
 
-def select_json():
-    root = tk.Tk()
-    root.withdraw()  # Hide the main window
-    file_paths = filedialog.askopenfilenames(
-        title="Select JSON files",
-        filetypes=[("JSON files", "*.json")],
-    )
-    return list(file_paths)
+
 
 def extract_device_data(file_paths):
     for file_path in file_paths:
@@ -114,7 +108,7 @@ def extract_device_data(file_paths):
         #fetch device material from device type
         semiconductor_material = device_type.split()[0]
         device_type = " ".join(device_type.split()[1:])
-        
+
         with open(file_path, 'r', encoding = 'utf-8') as f:
             data = json.load(f)
             devices_data = []
@@ -172,12 +166,61 @@ def extract_device_data(file_paths):
     return
 
 
-models.DeviceData.objects.all().delete()
-json_paths = select_json()
-extract_device_data(json_paths)
+def select_json(root):
+    win = tk.Toplevel(root)
+    win.withdraw()  # Hide the main window
+    file_paths = filedialog.askopenfilenames(
+        title="Select JSON files",
+        filetypes=[("JSON files", "*.json")],
+    )
+    return list(file_paths)
+
+def extract_material_parameters(root):
+    select_path = select_doc(root)[0]
+    df = pd.read_excel(select_path)
+
+    for _, row in df.iterrows():
+        models.MaterialLimit.objects.create(
+            material=row['Material'],
+            epsilon=row['epsilon'],
+            miu=row['miu'],
+            Ec=row['Ec'],
+        )
+
+    return
+
+def select_doc(root):
+    
+    win = tk.Toplevel(root)
+    win.withdraw()  # Hide the main window
+    file_path = filedialog.askopenfilenames(
+        title="Select xlsx files",
+        filetypes=[("xlsx files", "*.xlsx")],
+    )
+    return list(file_path)
 
 
-#MaterialLimit.objects.all().delete()
+
+def select_function():
+    root = tk.Tk()
+    root.title("Select Function")
+
+    label = tk.Label(root, text="Which function do you want to use?")
+    label.pack(pady=10)
+
+    tk.Button(root, text="Add Material Limit (.xlsx)", command=lambda: extract_material_parameters(root)).pack(pady=5)
+    tk.Button(root, text="Add device data (.json)", command=lambda: select_json(root)).pack(pady=5)
+    
+
+    root.mainloop()
+
+#models.MaterialLimit.objects.all().delete()
+#models.DeviceData.objects.all().delete()
+
+select_function()
+
+
+
 #models.DeviceData.objects.filter(doi="10.1109/LED.2015.2478907").delete()
 
 #json_data = extract_limits('./charts/limits_brV_Ron(2).json')

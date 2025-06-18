@@ -31,5 +31,7 @@ class DeviceData(models.Model):
 
 class MaterialLimit(models.Model):
     material = models.CharField(max_length=255, blank=True, default='')
-    br_voltage = models.JSONField(default=list, blank=True)
-    r_on = models.JSONField(default=list, blank=True)
+    epsilon = models.FloatField(blank = True, default=0)
+    miu = models.FloatField(blank = True, default=0)
+    Ec = models.FloatField(blank = True, default=0)
+    
