@@ -95,7 +95,8 @@ def insert_into_db(dataset):
 
 
 
-def extract_device_data(file_paths):
+def extract_device_data(root):
+    file_paths = select_json(root)
     for file_path in file_paths:
         # fetch file name from path
         file_name = os.path.basename(file_path)
@@ -209,7 +210,7 @@ def select_function():
     label.pack(pady=10)
 
     tk.Button(root, text="Add Material Limit (.xlsx)", command=lambda: extract_material_parameters(root)).pack(pady=5)
-    tk.Button(root, text="Add device data (.json)", command=lambda: select_json(root)).pack(pady=5)
+    tk.Button(root, text="Add device data (.json)", command=lambda: extract_device_data(root)).pack(pady=5)
     
 
     root.mainloop()

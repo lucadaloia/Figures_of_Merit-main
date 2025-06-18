@@ -3,7 +3,7 @@ import PyPDF2 #library to read and extract data/text from PDF document
 import requests
 from urllib.parse import quote
 import pdf_select
-import plot_extract
+
 
 
 import os
