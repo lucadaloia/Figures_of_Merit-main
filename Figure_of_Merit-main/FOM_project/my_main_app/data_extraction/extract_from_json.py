@@ -215,7 +215,7 @@ def select_function():
 
     root.mainloop()
 
-#models.MaterialLimit.objects.all().delete()
+models.MaterialLimit.objects.all().delete()
 #models.DeviceData.objects.all().delete()
 
 select_function()

@@ -4,6 +4,8 @@ import plotly.graph_objs as go
 from plotly.offline import plot
 from collections import defaultdict
 import numpy as np
+import matplotlib.pyplot as plt
+
 
 global customdata
 def home(request):
@@ -97,26 +99,29 @@ def material_limits(request):
     ##################
 
     limit_traces = []
+    x_data = []
+   
 
     device_materials = set(d.semiconductor_material for d in devices)
     for limit in limits:
+        y_data = []
         if hasattr(limit, 'material') and limit.material in device_materials:
-            x_data = limit.br_voltage
-            y_data = limit.r_on
+            x_data = np.logspace(0, 7, num=200)
+            y_data = [((4 * x ** 2) / (limit.epsilon * 8.85 * 10 **(-14) * limit.miu * limit.Ec ** 3)* 1e3) for x in x_data]
             limit_traces.append(go.Scatter(
-                x=x_data,
-                y=y_data,
+                x=list(x_data),
+                y=list(y_data),
                 mode='lines',
                 name=str(limit.material),
                 visible=True  # This trace will be visible
             ))
         else:
             
-            x_data = limit.br_voltage
-            y_data = limit.r_on
+            x_data = np.logspace(0, 7, num=200)
+            y_data = [((4 * x ** 2) / (limit.epsilon * 8.85 * 10 **(-14) * limit.miu * limit.Ec ** 3) * 1e3) for x in x_data]
             limit_traces.append(go.Scatter(
-                x=x_data,
-                y=y_data,
+                x=list(x_data),
+                y=list(y_data),
                 mode='lines',
                 name=str(limit.material),
                 visible='legendonly'  # This trace will be hidden initially
@@ -127,31 +132,31 @@ def material_limits(request):
     all_x = []
     all_y = []
     for trace in device_traces:
+        trace.x = np.array(trace.x, dtype=float)
         all_x.extend(trace.x)
         all_y.extend(trace.y)
 
-    if all_x:
+    if all_x and all_y:
         min_x = min(all_x)
         max_x = max(all_x)
-        x_min = min_x * 0.8  # 20% less than the smallest x
-        x_max = max_x * 1.2  # 20% more than the largest x
-        xaxis_range = [np.log10(x_min), np.log10(x_max)]
-    else:
-        xaxis_range = None
-    if all_y:
         min_y = min(all_y)
         max_y = max(all_y)
-        y_min = min_y * 0.8  # 20% less than the smallest y
-        y_max = max_y * 1.2  # 20% more than the largest y
+        # Add 20% margin
+        x_min = min_x * 0.5
+        x_max = max_x * 1.5
+        y_min = min_y * 0.5
+        y_max = max_y * 1.5
+        xaxis_range = [np.log10(x_min), np.log10(x_max)]
         yaxis_range = [np.log10(y_min), np.log10(y_max)]
     else:
+        xaxis_range = None
         yaxis_range = None
 
 
     all_traces = device_traces + limit_traces
 
     layout = go.Layout(
-        xaxis=dict(title="Breakdown Voltage (V)", type='log', range=xaxis_range),
+        xaxis=dict(title="Breakdown Voltage (V)", type='log', range = xaxis_range),
         yaxis=dict(title="R<sub>on</sub> (mΩ·cm²)", type='log', range=yaxis_range),
         hovermode='closest'
     )
@@ -162,3 +167,5 @@ def material_limits(request):
     return render(request, 'my_main_app/FOM_plot.html', {
         'plot_div': plot_div,
     })
+
+
